@@ -1,0 +1,12 @@
+{
+  "name": "grpc-smartwarehouse",
+  "version": "1.0.0",
+  "description": "NCI Distributed Systems CA - Smart Warehouse",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
