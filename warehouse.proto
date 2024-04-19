@@ -7,6 +7,14 @@ service Warehouse {
   // Check all products data
   rpc CheckStockLevel (CheckStockRequest) returns (StockLevelResponse) {}
 
+  // Low stock alert
+  rpc LowStockAlert (LowStockAlertRequest) returns (LowStockAlertResponse) {}
+
+  // Colect/Pick item in the warehouse
+  rpc PickItem (PickItemRequest) returns (PickItemResponse) {}
+
+  // Place a repo order
+  rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse) {}
 }
 
 // Messages of response
@@ -14,6 +22,32 @@ message CheckStockRequest {}
 
 message StockLevelResponse {
   repeated Product products = 1;
+}
+
+message LowStockAlertRequest {
+  string itemId = 1;
+  int32 threshold = 2;
+}
+
+message LowStockAlertResponse {
+  string message = 1;
+}
+
+message PickItemRequest {
+  string itemId = 1;
+}
+
+message PickItemResponse {
+  string message = 1;
+}
+
+message PlaceOrderRequest {
+  string itemId = 1;
+  int32 quantity = 2;
+}
+
+message PlaceOrderResponse {
+  string message = 1;
 }
 
 // Product message
