@@ -4,15 +4,57 @@ const packageDefinition = protoLoader.loadSync('warehouse.proto', {});
 const warehouseProto = grpc.loadPackageDefinition(packageDefinition).warehouse;
 
 const server = new grpc.Server();
-const products = "Itens";
+
+const products = [
+    { itemId: 1, itemName: "Gold Ring", itemQuantity: 20 },
+    { itemId: 2, itemName: "Silver Ring", itemQuantity: 10 },
+    { itemId: 3, itemName: "Platinum Bracelet", itemQuantity: 15 },
+    { itemId: 4, itemName: "Diamond Necklace", itemQuantity: 25 },
+    { itemId: 5, itemName: "Ruby Earrings", itemQuantity: 18 },
+    { itemId: 6, itemName: "Sapphire Pendant", itemQuantity: 12 },
+    { itemId: 7, itemName: "Emerald Brooch", itemQuantity: 8 },
+    { itemId: 8, itemName: "Pearl Tiara", itemQuantity: 30 },
+    { itemId: 9, itemName: "Amethyst Bracelet", itemQuantity: 22 },
+    { itemId: 10, itemName: "Opal Ring", itemQuantity: 17 },
+  ];
 
 server.addService(warehouseProto.Warehouse.service, {
 
     CheckStockLevel: (call, callback) => {
-        console.log('Stock');
-        callback(null, products);
+        console.log('Client request option 01.');
+        // Return products list
+        callback(null, { products: products.map(product => ({
+          itemId: product.itemId,
+          itemName: product.itemName,
+          itemQuantity: product.itemQuantity
+        })) });
     },
 
+    LowStockAlert: (call, callback) => {
+        console.log('Client request option 02.');
+        // Logic for low stock alert
+        const itemId = call.request.itemId;
+        const threshold = call.request.threshold;
+        const message = sendLowStockAlert(itemId, threshold);
+        callback(null, { message: message });
+    },
+
+    PickItem: (call, callback) => {
+        console.log('Client request option 03.');
+        // Logic to pick a product from stock
+        const itemId = call.request.itemId;
+        const message = pickItem(itemId);
+        callback(null, { message: message });
+    },
+
+    PlaceOrder: (call, callback) => {
+        console.log('Client request option 04.');
+        // Logic to add a product to stock
+        const itemId = call.request.itemId;
+        const quantity = call.request.quantity;
+        const message = placeOrder(itemId, quantity);
+        callback(null, { message: message });
+    }
 });
 
 server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), (err, port) => {
@@ -23,3 +65,28 @@ server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), (er
   server.start();
   console.log(`Server running at http://127.0.0.1:${port}`);
 });
+
+function sendLowStockAlert(itemId, threshold) {
+  // Logic to send low stock alert
+  if (checkItemLevel(itemId) < threshold) {
+    return `Low stock alert for item ${itemId}`;
+  } else {
+    return `Stock level for item ${itemId} is sufficient`;
+  }
+}
+
+function pickItem(itemId) {
+  // Logico to take/pick a product from stock
+  return `Item ${itemId} picked successfully`;
+}
+
+function placeOrder(itemId, quantity) {
+  // Logic to add new products into stock
+  return `Order for ${quantity} of item ${itemId} placed successfully`;
+}
+
+function checkItemLevel(itemId) {
+  // Lógica para verificar o nível de estoque
+  // Retorna um valor fictício para fins de demonstração
+  return 10;
+}
