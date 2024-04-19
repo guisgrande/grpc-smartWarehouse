@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 const packageDefinition = protoLoader.loadSync('warehouse.proto');
 const warehouseProto = grpc.loadPackageDefinition(packageDefinition).warehouse;
 
-const client = new warehouseProto.Warehouse('localhost:50051', grpc.credentials.createInsecure());
+const client = new warehouseProto.Warehouse('localhost:50052', grpc.credentials.createInsecure());
 
 function askQuestion(query) {
     return new Promise(resolve => rl.question(query, resolve));
@@ -65,9 +65,11 @@ async function main() {
                 break;
             case '3':
                 // Pick Item
-                const pickItemId = await askQuestion('Enter item ID: ');
+                const itemId = parseInt(await askQuestion('Enter item ID: '), 10);
+                const quantityToPick = parseInt(await askQuestion('Enter quantity to pick: '), 10);
+
                 await new Promise(resolve => {
-                    client.PickItem({ itemId: pickItemId }, (error, response) => {
+                    client.PickItem({ itemId: itemId, quantityToPick: quantityToPick }, (error, response) => {
                         if (error) {
                             console.error(error);
                         } else {

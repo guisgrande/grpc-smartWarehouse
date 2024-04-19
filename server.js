@@ -40,12 +40,33 @@ server.addService(warehouseProto.Warehouse.service, {
     },
 
     PickItem: (call, callback) => {
-        console.log('Client request option 03.');
-        // Logic to pick a product from stock
-        const itemId = call.request.itemId;
-        const message = pickItem(itemId);
-        callback(null, { message: message });
-    },
+      console.log('Client request option 03.');
+      const itemId = call.request.itemId;
+      console.log('Item ID call: ' + itemId);
+      const quantityToPick = call.request.quantityToPick;
+      console.log('Quantity to pick: ' + quantityToPick);
+
+      // Find product by ID
+      const productIndex = products.findIndex(product => product.itemId === parseInt(itemId));
+      console.log('productIndex: ' + productIndex);
+
+      if (productIndex !== -1) {
+          if (products[productIndex].itemQuantity >= quantityToPick) {
+              // Calculate new quantity by subtracting quantityToPick from current quantity
+              const newQuantity = products[productIndex].itemQuantity - quantityToPick;
+              // Update the product quantity in the products array
+              products[productIndex].itemQuantity = newQuantity;
+              const message = `Picked ${quantityToPick} of ${products[productIndex].itemName}. Total quantity remaining: ${newQuantity}.`;
+              callback(null, { message: message });
+          } else {
+              const message = 'Not enough quantity in stock.';
+              callback(null, { message: message });
+          }
+      } else {
+          const message = 'Product not found.';
+          callback(null, { message: message });
+      }
+  },
 
     PlaceOrder: (call, callback) => {
         console.log('Client request option 04.');
@@ -55,9 +76,10 @@ server.addService(warehouseProto.Warehouse.service, {
         const message = placeOrder(itemId, quantity);
         callback(null, { message: message });
     }
+
 });
 
-server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), (err, port) => {
+server.bindAsync('127.0.0.1:50052', grpc.ServerCredentials.createInsecure(), (err, port) => {
   if (err != null) {
     console.error(err);
     return;
