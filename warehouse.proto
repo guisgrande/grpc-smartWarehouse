@@ -7,8 +7,8 @@ service Warehouse {
   // Check all products data
   rpc CheckStockLevel (CheckStockRequest) returns (StockLevelResponse) {}
 
-  // Low stock alert
-  rpc LowStockAlert (LowStockAlertRequest) returns (LowStockAlertResponse) {}
+  // Set stock alert
+  rpc SetStockAlert (SetStockAlertRequest) returns (SetStockAlertResponse) {}
 
   // Colect/Pick item in the warehouse
   rpc PickItem (PickItemRequest) returns (PickItemResponse) {}
@@ -25,12 +25,12 @@ message StockLevelResponse {
   repeated Product products = 1;
 }
 
-message LowStockAlertRequest {
+message SetStockAlertRequest {
   string itemId = 1;
-  int32 threshold = 2;
+  int32 newLowQnt = 2;
 }
 
-message LowStockAlertResponse {
+message SetStockAlertResponse {
   string message = 1;
 }
 
@@ -57,4 +57,6 @@ message Product {
   int32 itemId = 1;
   string itemName = 2;
   int32 itemQuantity = 3;
+  int32 lowQnt = 4;
+  int32 overQnt = 5;
 }
