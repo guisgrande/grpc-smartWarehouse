@@ -16,12 +16,48 @@ function askQuestion(query) {
     return new Promise(resolve => rl.question(query, resolve));
 }
 
+async function automateWarehouse() {
+    let stopAutomation = false;
+
+    // Automation Loop
+    while (!stopAutomation) {
+        await new Promise(resolve => {
+            client.AutomateWarehouse({}, (error, response) => {
+                if (error) {
+                    console.error(error);
+                } else {
+                    console.log('--------------------------------------' + '\n');
+                    console.log('Automation Response:', response.message);
+                    console.log('\n' + '--------------------------------------');
+                }
+                resolve();
+            });
+        });
+
+        // 06 seconds to the next automation
+        console.log('Processing next automation... \nPress Q + ENTER and wait to stop.');
+        await new Promise(resolve => {
+            const timer = setTimeout(resolve, 6000);
+
+            // Check if client wanna to close automation
+            rl.question('', (answer) => {
+                if (answer.toUpperCase() === 'Q') {
+                    clearTimeout(timer);
+                    stopAutomation = true;
+                }
+                resolve();
+            });
+        });
+    }
+}
+
 // Main function to run the menu options loop
 async function main() {
     let choice = '';
     while (choice !== '5') {
         console.log('######-WAREHOUSE-######');
         console.log('Select an action:');
+        console.log('0: Automated Process')
         console.log('1: Check Stock Level');
         console.log('2: Set Stock Alert');
         console.log('3: Pick Item');
@@ -32,6 +68,15 @@ async function main() {
         choice = await askQuestion('Enter choice: ');
 
         switch (choice) {
+
+            case '0':
+                const automate = await askQuestion('Turn on the automation? (1) for YES / (2) for NO): ');
+                if (automate === '1') {
+                    await automateWarehouse();
+                }
+                console.log('#######################');
+                break;
+                     
 
             case '1':
                 // Check Stock Level - Return all products and current data
@@ -105,7 +150,7 @@ async function main() {
                 break;
 
             case '5':
-                // Close the loop and the client side server. (Reset the data)
+                // Close the loop and the client side server. (No reset the data, just if torn off the server.js)
                 console.log('Exiting...');
                 break;
 
