@@ -45,7 +45,7 @@ message PickItemResponse {
 
 message PlaceOrderRequest {
   string itemId = 1;
-  int32 quantity = 2;
+  int32 quantityToOrder = 2;
 }
 
 message PlaceOrderResponse {

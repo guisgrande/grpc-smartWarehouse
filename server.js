@@ -66,15 +66,36 @@ server.addService(warehouseProto.Warehouse.service, {
           const message = 'Product not found.';
           callback(null, { message: message });
       }
-  },
+    },
 
     PlaceOrder: (call, callback) => {
         console.log('Client request option 04.');
         // Logic to add a product to stock
         const itemId = call.request.itemId;
-        const quantity = call.request.quantity;
-        const message = placeOrder(itemId, quantity);
-        callback(null, { message: message });
+        console.log('Item ID call: ' + itemId);
+        const quantityToOrder = call.request.quantityToOrder;
+        console.log('Quantity to order: ' + quantityToOrder);
+  
+        // Find product by ID
+        const productIndex = products.findIndex(product => product.itemId === parseInt(itemId));
+        console.log('productIndex: ' + productIndex);
+  
+        if (productIndex !== -1) {
+            if (products[productIndex].itemQuantity <= 100) {
+                // Calculate new quantity by adding quantityToOrder from current quantity
+                const newQuantity = products[productIndex].itemQuantity + quantityToOrder;
+                // Update the product quantity in the products array
+                products[productIndex].itemQuantity = newQuantity;
+                const message = `Order more ${quantityToOrder} of ${products[productIndex].itemName}. Total quantity updated: ${newQuantity}.`;
+                callback(null, { message: message });
+            } else {
+                const message = 'Not enough space in stock for this product.';
+                callback(null, { message: message });
+            }
+        } else {
+            const message = 'Product not found.';
+            callback(null, { message: message });
+        }
     }
 
 });
@@ -97,11 +118,6 @@ function sendLowStockAlert(itemId, threshold) {
   }
 }
 
-function pickItem(itemId) {
-  // Logico to take/pick a product from stock
-  return `Item ${itemId} picked successfully`;
-}
-
 function placeOrder(itemId, quantity) {
   // Logic to add new products into stock
   return `Order for ${quantity} of item ${itemId} placed successfully`;
@@ -109,6 +125,5 @@ function placeOrder(itemId, quantity) {
 
 function checkItemLevel(itemId) {
   // Lógica para verificar o nível de estoque
-  // Retorna um valor fictício para fins de demonstração
   return 10;
 }

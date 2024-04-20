@@ -65,11 +65,11 @@ async function main() {
                 break;
             case '3':
                 // Pick Item
-                const itemId = parseInt(await askQuestion('Enter item ID: '), 10);
+                const pickItemId = parseInt(await askQuestion('Enter item ID: '), 10);
                 const quantityToPick = parseInt(await askQuestion('Enter quantity to pick: '), 10);
 
                 await new Promise(resolve => {
-                    client.PickItem({ itemId: itemId, quantityToPick: quantityToPick }, (error, response) => {
+                    client.PickItem({ itemId: pickItemId, quantityToPick: quantityToPick }, (error, response) => {
                         if (error) {
                             console.error(error);
                         } else {
@@ -83,9 +83,9 @@ async function main() {
             case '4':
                 // Place Order
                 const placeOrderItemId = await askQuestion('Enter item ID: ');
-                const quantity = parseInt(await askQuestion('Enter quantity: '), 10);
+                const quantityToOrder = parseInt(await askQuestion('Enter quantity to order: '), 10);
                 await new Promise(resolve => {
-                    client.PlaceOrder({ itemId: placeOrderItemId, quantity: quantity }, (error, response) => {
+                    client.PlaceOrder({ itemId: placeOrderItemId, quantityToOrder: quantityToOrder }, (error, response) => {
                         if (error) {
                             console.error(error);
                         } else {
