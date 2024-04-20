@@ -4,6 +4,10 @@ package warehouse;
 
 // Definition of Warehouse service
 service Warehouse {
+
+  // Automate Warehouse Service
+  rpc AutomateWarehouse (AutomateWarehouseRequest) returns (AutomateWarehouseResponse) {}
+
   // Check all products data
   rpc CheckStockLevel (CheckStockRequest) returns (StockLevelResponse) {}
 
@@ -19,6 +23,13 @@ service Warehouse {
 }
 
 // Messages of response
+
+message AutomateWarehouseRequest {}
+
+message AutomateWarehouseResponse {
+  string message = 1;
+}
+
 message CheckStockRequest {}
 
 message StockLevelResponse {
