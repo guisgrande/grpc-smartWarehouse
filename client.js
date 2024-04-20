@@ -16,6 +16,7 @@ function askQuestion(query) {
     return new Promise(resolve => rl.question(query, resolve));
 }
 
+// Main function to run the menu options loop
 async function main() {
     let choice = '';
     while (choice !== '5') {
@@ -31,7 +32,9 @@ async function main() {
         choice = await askQuestion('Enter choice: ');
 
         switch (choice) {
+
             case '1':
+                // Check Stock Level - Return all products and current data
                 await new Promise(resolve => {
                     client.CheckStockLevel({}, (error, response) => {
                         if (error) {
@@ -47,8 +50,9 @@ async function main() {
                     });
                 });
                 break;
+
                 case '2':
-                    // Set Stock Alert
+                    // Set Stock Alert - Can rewrite the low level stock for each product
                     const setStockAlertItemId = parseInt(await askQuestion('Enter item ID: '), 10);
                     const newLowQnt = parseInt(await askQuestion('Enter new low stock alert quantity: '), 10);
                 
@@ -64,8 +68,9 @@ async function main() {
                         });
                     });
                     break;
+
             case '3':
-                // Pick Item
+                // Pick Item - Colect/Pick item to be send to client
                 const pickItemId = parseInt(await askQuestion('Enter item ID: '), 10);
                 const quantityToPick = parseInt(await askQuestion('Enter quantity to pick: '), 10);
 
@@ -81,8 +86,9 @@ async function main() {
                     });
                 });
                 break;
+
             case '4':
-                // Place Order
+                // Place Order - Request new product to replace
                 const placeOrderItemId = await askQuestion('Enter item ID: ');
                 const quantityToOrder = parseInt(await askQuestion('Enter quantity to order: '), 10);
                 await new Promise(resolve => {
@@ -97,10 +103,14 @@ async function main() {
                     });
                 });
                 break;
+
             case '5':
+                // Close the loop and the client side server. (Reset the data)
                 console.log('Exiting...');
                 break;
+
             default:
+                // Invalid choice message.
                 console.log('Invalid choice');
                 break;
         }
