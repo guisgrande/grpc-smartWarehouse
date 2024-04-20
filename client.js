@@ -22,7 +22,7 @@ async function main() {
         console.log('######-WAREHOUSE-######');
         console.log('Select an action:');
         console.log('1: Check Stock Level');
-        console.log('2: Low Stock Alert');
+        console.log('2: Set Stock Alert');
         console.log('3: Pick Item');
         console.log('4: Place Order');
         console.log('5: Exit');
@@ -39,7 +39,7 @@ async function main() {
                         } else {
                             console.log('Stock level for all products:');
                             response.products.forEach(product => {
-                                console.log(`Item ID: ${product.itemId}, Item Name: ${product.itemName}, Item Quantity: ${product.itemQuantity}`);
+                                console.log(`ItemID: ${product.itemId} | Name: ${product.itemName} | Qnt: ${product.itemQuantity} | Low/Max: ${product.lowQnt}/${product.overQnt}`);
                             });
                             console.log('#######################');
                         }
@@ -47,22 +47,23 @@ async function main() {
                     });
                 });
                 break;
-            case '2':
-                // Low Stock Alert
-                const lowStockAlertItemId = await askQuestion('Enter item ID: ');
-                const threshold = parseInt(await askQuestion('Enter threshold: '), 10);
-                await new Promise(resolve => {
-                    client.LowStockAlert({ itemId: lowStockAlertItemId, threshold: threshold }, (error, response) => {
-                        if (error) {
-                            console.error(error);
-                        } else {
-                            console.log('Alert:', response.message);
-                            console.log('#######################');
-                        }
-                        resolve();
+                case '2':
+                    // Set Stock Alert
+                    const setStockAlertItemId = parseInt(await askQuestion('Enter item ID: '), 10);
+                    const newLowQnt = parseInt(await askQuestion('Enter new low stock alert quantity: '), 10);
+                
+                    await new Promise(resolve => {
+                        client.SetStockAlert({ itemId: setStockAlertItemId, newLowQnt: newLowQnt }, (error, response) => {
+                            if (error) {
+                                console.error(error);
+                            } else {
+                                console.log('Update Alert:', response.message);
+                                console.log('#######################');
+                            }
+                            resolve();
+                        });
                     });
-                });
-                break;
+                    break;
             case '3':
                 // Pick Item
                 const pickItemId = parseInt(await askQuestion('Enter item ID: '), 10);
