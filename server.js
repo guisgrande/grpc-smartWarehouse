@@ -6,17 +6,17 @@ const warehouseProto = grpc.loadPackageDefinition(packageDefinition).warehouse;
 const server = new grpc.Server();
 
 const products = [
-    { itemId: 1, itemName: "Gold Ring", itemQuantity: 20 },
-    { itemId: 2, itemName: "Silver Ring", itemQuantity: 10 },
-    { itemId: 3, itemName: "Platinum Bracelet", itemQuantity: 15 },
-    { itemId: 4, itemName: "Diamond Necklace", itemQuantity: 25 },
-    { itemId: 5, itemName: "Ruby Earrings", itemQuantity: 18 },
-    { itemId: 6, itemName: "Sapphire Pendant", itemQuantity: 12 },
-    { itemId: 7, itemName: "Emerald Brooch", itemQuantity: 8 },
-    { itemId: 8, itemName: "Pearl Tiara", itemQuantity: 30 },
-    { itemId: 9, itemName: "Amethyst Bracelet", itemQuantity: 22 },
-    { itemId: 10, itemName: "Opal Ring", itemQuantity: 17 },
-  ];
+    { itemId: 1, itemName: "Gold Ring", itemQuantity: 20, lowQnt: 5, overQnt: 100 },
+    { itemId: 2, itemName: "Silver Ring", itemQuantity: 10, lowQnt: 5, overQnt: 100 },
+    { itemId: 3, itemName: "Platinum Bracelet", itemQuantity: 15, lowQnt: 5, overQnt: 100 },
+    { itemId: 4, itemName: "Diamond Necklace", itemQuantity: 25, lowQnt: 5, overQnt: 100 },
+    { itemId: 5, itemName: "Ruby Earrings", itemQuantity: 18, lowQnt: 5, overQnt: 100 },
+    { itemId: 6, itemName: "Sapphire Pendant", itemQuantity: 12, lowQnt: 5, overQnt: 100 },
+    { itemId: 7, itemName: "Emerald Brooch", itemQuantity: 8, lowQnt: 5, overQnt: 100 },
+    { itemId: 8, itemName: "Pearl Tiara", itemQuantity: 30, lowQnt: 5, overQnt: 100 },
+    { itemId: 9, itemName: "Amethyst Bracelet", itemQuantity: 22, lowQnt: 5, overQnt: 100 },
+    { itemId: 10, itemName: "Opal Ring", itemQuantity: 17, lowQnt: 5, overQnt: 100 },
+];
 
 server.addService(warehouseProto.Warehouse.service, {
 
@@ -26,18 +26,31 @@ server.addService(warehouseProto.Warehouse.service, {
         callback(null, { products: products.map(product => ({
           itemId: product.itemId,
           itemName: product.itemName,
-          itemQuantity: product.itemQuantity
-        })) });
+          itemQuantity: product.itemQuantity,
+          lowQnt: product.lowQnt,
+          overQnt: product.overQnt
+      })) });
     },
 
-    LowStockAlert: (call, callback) => {
-        console.log('Client request option 02.');
-        // Logic for low stock alert
-        const itemId = call.request.itemId;
-        const threshold = call.request.threshold;
-        const message = sendLowStockAlert(itemId, threshold);
-        callback(null, { message: message });
-    },
+    SetStockAlert: (call, callback) => {
+      console.log('Client request option 02.');
+      // Logic for setting stock alert
+      const itemId = call.request.itemId;
+      console.log('Item ID call: ' + itemId);
+      const newLowQnt = call.request.newLowQnt;
+      console.log('New low: ' + newLowQnt);
+  
+      const productIndex = products.findIndex(product => product.itemId === parseInt(itemId));
+      if (productIndex !== -1) {
+          products[productIndex].lowQnt = newLowQnt;
+          const message = `Stock alert for ${products[productIndex].itemName} updated to ${newLowQnt}.`;
+          callback(null, { message: message });
+      } else {
+          const message = 'Product not found.';
+          callback(null, { message: message });
+      }
+  },
+  
 
     PickItem: (call, callback) => {
       console.log('Client request option 03.');
@@ -56,8 +69,16 @@ server.addService(warehouseProto.Warehouse.service, {
               const newQuantity = products[productIndex].itemQuantity - quantityToPick;
               // Update the product quantity in the products array
               products[productIndex].itemQuantity = newQuantity;
-              const message = `Picked ${quantityToPick} of ${products[productIndex].itemName}. Total quantity remaining: ${newQuantity}.`;
-              callback(null, { message: message });
+              
+              // Check if send a Low Stock Alert
+              const threshold = products[productIndex].lowQnt;
+              if (newQuantity < threshold) {
+                const message = `Picked ${quantityToPick} of ${products[productIndex].itemName}. Low Stock Alert! Only left: ${newQuantity}.`;
+                callback(null, { message: message });
+              } else {
+                const message = `Picked ${quantityToPick} of ${products[productIndex].itemName}. Total quantity remaining: ${newQuantity}.`;
+                callback(null, { message: message });
+              }  
           } else {
               const message = 'Not enough quantity in stock.';
               callback(null, { message: message });
@@ -108,22 +129,3 @@ server.bindAsync('127.0.0.1:50052', grpc.ServerCredentials.createInsecure(), (er
   server.start();
   console.log(`Server running at http://127.0.0.1:${port}`);
 });
-
-function sendLowStockAlert(itemId, threshold) {
-  // Logic to send low stock alert
-  if (checkItemLevel(itemId) < threshold) {
-    return `Low stock alert for item ${itemId}`;
-  } else {
-    return `Stock level for item ${itemId} is sufficient`;
-  }
-}
-
-function placeOrder(itemId, quantity) {
-  // Logic to add new products into stock
-  return `Order for ${quantity} of item ${itemId} placed successfully`;
-}
-
-function checkItemLevel(itemId) {
-  // Lógica para verificar o nível de estoque
-  return 10;
-}
