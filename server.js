@@ -22,6 +22,58 @@ const products = [
 // Services
 server.addService(warehouseProto.Warehouse.service, {
 
+    // Option 00 - Automates Warehouse System to Pick requested products and handle with stock level to place auto repo orders
+    AutomateWarehouse: async (call, callback) => {
+        console.log('Automate Warehouse request received.');
+        while (true) {
+            // Logic for AutomateWarehouse
+            const randomItemId = Math.floor(Math.random() * 10) + 1;
+            const randomQuantity = Math.floor(Math.random() * 10) + 1;
+
+            const productIndex = products.findIndex(product => product.itemId === randomItemId);
+            if (productIndex !== -1) {
+
+                if (products[productIndex].itemQuantity >= randomQuantity) {
+                    // If enought stock. Pick the quantity of requeste item
+                    products[productIndex].itemQuantity -= randomQuantity;
+                    const prodName = products[productIndex].itemName;
+                    // Check if the remaining stock has reached or is below the alert level (lowQty)
+                    if (products[productIndex].itemQuantity <= products[productIndex].lowQnt) {
+                        // If stock reaches the alert level, place an emergency order for 25 more products
+                        const emergencyQuantity = 25;
+                        products[productIndex].itemQuantity += emergencyQuantity;
+                        const message = `Requested itemId ${randomItemId} (${prodName}) - Total of ${randomQuantity} items picked.`
+                        const alertMessage = `Low Stock Alert! Emergency order placed for Item ID ${randomItemId} (${prodName}) - More ${emergencyQuantity} additional items ordered.`;
+                        console.log(message + '\n' + alertMessage);
+                        callback(null, { message: message + '\n' + alertMessage});
+                    } else {
+                        const message = `Requested itemId ${randomItemId} (${prodName}) - Total of ${randomQuantity} items picked.`
+                        console.log(message);
+                        callback(null, { message: message });
+                    }
+                } else {
+                    // If no sufficient stock. Auto make a new order
+                    const quantityToOrder = products[productIndex].overQnt - products[productIndex].itemQuantity;
+                    products[productIndex].itemQuantity = products[productIndex].overQnt;
+                    const prodName = products[productIndex].itemName;
+                    const message = `No enought stock for Item ID ${randomItemId} (${prodName}). Placed repo order of more ${quantityToOrder} items.`;
+                    console.log(message);
+                    callback(null, { message: message });
+                }
+            }
+
+            // Wait 06 seconds
+            await new Promise(resolve => setTimeout(resolve, 6000));
+
+            // Check if client request to stop
+            if (call.cancelled) {
+                console.log('Automate Warehouse stopped by client.');
+                break;
+            }
+        }
+        callback(null, { message: 'Automate Warehouse stopped.' });
+    },
+
     // Option 01 - Check Stock Level return the products
     CheckStockLevel: (call, callback) => {
         console.log('Client request option 01.');
