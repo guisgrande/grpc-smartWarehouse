@@ -186,6 +186,5 @@ server.bindAsync('127.0.0.1:50052', grpc.ServerCredentials.createInsecure(), (er
     console.error(err);
     return;
   }
-  server.start();
   console.log(`Server running at http://127.0.0.1:${port}`);
 });
